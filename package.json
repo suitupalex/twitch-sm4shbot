@@ -1,0 +1,36 @@
+{
+  "name": "twitch-sm4shbot",
+  "version": "0.1.0",
+  "description": "A Twitch bot for Smash 4 streamers.",
+  "main": "sm4shbot.js",
+  "dependencies": {
+    "debug": "^2.2.0",
+    "tmi.js": "^0.0.24"
+  },
+  "devDependencies": {
+    "tap": "^2.2.0"
+  },
+  "scripts": {
+    "start": "node sm4shbot.js"
+  , "test": "tap test/**/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/twitch-sm4shbot/twitch-sm4shbot"
+  },
+  "keywords": [
+    "twitch",
+    "bot",
+    "smash",
+    "bros",
+    "sm4sh",
+    "ssb4",
+    "sakurai"
+  ],
+  "author": "Alexander Martin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/twitch-sm4shbot/twitch-sm4shbot/issues"
+  },
+  "homepage": "https://github.com/twitch-sm4shbot/twitch-sm4shbot"
+}
