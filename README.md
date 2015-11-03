@@ -6,6 +6,21 @@
 
 A Twitch bot for Smash 4 streamers.
 
+## Feedback & Support
+
+If you need help adding Sm4shbot to your stream or want to submit feedback or a
+bug report, here is how you can reach us:
+
+* File support issues in the [support repo](https://github.com/twitch-sm4shbot/support).
+* Make a post in the [sm4shbot subreddit](https://reddit.com/r/sm4shbot).
+* Tweet at [@sm4shbot](https://twitter.com/sm4shbot)
+* Email us at [help@sm4shbot.com](mailto:help@sm4shbot.com).
+
+## Contributing
+
+Sm4shbot is an open source project! If you know how to code, feel free to make a
+PR or create an issue for an ideas/code bugs.
+
 ## Setup
 
 Simply make `twitch-sm4shbot` a moderator of your stream. Then login with your
