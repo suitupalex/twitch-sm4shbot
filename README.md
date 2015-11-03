@@ -32,7 +32,7 @@ The kewyord to trigger bot commands is `!sm4sh`. E.g.:
 
 ### Admin
 
-These comamnds can only be run by trusted admins. The streamer is always a
+These commands can only be run by trusted admins. The streamer is always a
 trusted admin.
 
 #### on
