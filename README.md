@@ -1,8 +1,8 @@
 # twitch-sm4shbot
 
-[![Build Status](https://api.travis-ci.org/suitupalex/twitch-sm4shbot.svg)](https://travis-ci.org/suitupalex/twitch-sm4shbot)
+[![Build Status](https://api.travis-ci.org/twitch-sm4shbot/twitch-sm4shbot.svg)](https://travis-ci.org/twitch-sm4shbot/twitch-sm4shbot)
 [![npm version](https://badge.fury.io/js/twitch-sm4shbot.svg)](https://badge.fury.io/js/twitch-sm4shbot)
-[![Dependencies](https://david-dm.org/suitupalex/twitch-sm4shbot.svg)](https://david-dm.org/suitupalex/twitch-sm4shbot)
+[![Dependencies](https://david-dm.org/twitch-sm4shbot/twitch-sm4shbot.svg)](https://david-dm.org/twitch-sm4shbot/twitch-sm4shbot)
 
 A Twitch bot for Smash 4 streamers.
 
