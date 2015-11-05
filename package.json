@@ -1,6 +1,6 @@
 {
   "name": "twitch-sm4shbot",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Twitch bot for Smash 4 streamers.",
   "main": "sm4shbot.js",
   "dependencies": {

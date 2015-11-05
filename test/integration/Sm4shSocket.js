@@ -1,9 +1,11 @@
 'use strict'
 
 const debug = require('debug')('sb:test')
+const events = require('events')
 const tap = require('tap')
 
 const Sm4shClient = require('../../lib/Sm4shClient')
+const Sm4shSocket = require('../../lib/Sm4shSocket')
 
 const KW = '!sm4sh'
 const TEST_USERNAME = process.env.SB_USERNAME || 'twitch_sm4shbot'
@@ -13,25 +15,46 @@ const TEST_CHALLENGER2 = process.env.SB_TEST_CHALLENGER2 || 'challenger2'
 const TEST_CHALLENGER3 = process.env.SB_TEST_CHALLENGER3 || 'challenger3'
 
 var client
+var server
+var socket
 var channels
 var channel
 var queue
 var challenger
 var match
 
-function chatEmit(command, challenger, sub) {
-  client.emit(
-    'chat'
-  , `#${TEST_CHANNEL}`
-  , {
-      'display-name': challenger ? challenger : TEST_USERNAME
-    , subscriber: Boolean(sub)
-    }
-  , `${KW} ${command}`
-  )
+function socketEmit(message, isSub) {
+  const parsedMessage = client._parseMessage(`${KW} ${message}`)
+  const command = parsedMessage.command
+  const args = parsedMessage.args
+
+  var data = {channel: TEST_CHANNEL}
+
+  switch (command) {
+    case 'open':
+      data.subs = args[0]
+    break
+    case 'set':
+      data.variable = args[0]
+      data.value = args[1]
+    break
+    case 'add':
+      data.isSubscriber = Boolean(isSub)
+      data.username = args[0]
+      data.nnid = args[1]
+      data.ingameName = args.slice(2, args.length).join(' ')
+    break
+   case 'remove':
+      data.username = args[0]
+    break
+  }
+
+  debug('Capturing event:', command, data)
+
+  socket.emit(command, data)
 }
 
-tap.test('should setup mocked client', function mockTest(t) {
+tap.test('should setup mocked client', function mockClientTest(t) {
   Sm4shClient.prototype._sendMessage = function _sendMessage(user, message) {
     debug('Capturing message:', user, message)
     return true
@@ -39,6 +62,18 @@ tap.test('should setup mocked client', function mockTest(t) {
 
   client = new Sm4shClient()
   channels = client._sb.channels
+
+  t.end()
+})
+
+tap.test('should setup mocked socket', function mockSocketTest(t) {
+  server = new Sm4shSocket({
+    client: client
+  })
+
+  socket = new events.EventEmitter()
+
+  server.connectionHandler(socket)
 
   t.end()
 })
@@ -55,39 +90,23 @@ tap.test('should join channel', function joinTest(t) {
 })
 
 tap.test('should not open list', function notOpenTest(t) {
-  chatEmit('open')
+  socketEmit('open')
 
   t.notOk(channel.open)
 
   t.end()
 })
 
-tap.test('should not activate bot', function notActivateTest(t) {
-  chatEmit('on', TEST_CHALLENGER)
-
-  t.notOk(channel.active)
-
-  t.end()
-})
-
 tap.test('should activate bot', function activateTest(t) {
-  chatEmit('on')
+  socketEmit('on')
 
   t.ok(channel.active)
 
   t.end()
 })
 
-tap.test('should not open list', function notOpenNotAdminTest(t) {
-  chatEmit('open', TEST_CHALLENGER)
-
-  t.notOk(channel.open)
-
-  t.end()
-})
-
 tap.test('should open list', function openTest(t) {
-  chatEmit('open subs')
+  socketEmit('open subs')
 
   t.ok(channel.open)
   t.ok(channel.subsOnly)
@@ -96,7 +115,7 @@ tap.test('should open list', function openTest(t) {
 })
 
 tap.test('should add a challenger', function addTest(t) {
-  chatEmit(`add ${TEST_CHALLENGER} ${TEST_CHALLENGER} TEST CHALLENGER`)
+  socketEmit(`add ${TEST_CHALLENGER} ${TEST_CHALLENGER} TEST CHALLENGER`)
 
   t.equal(queue.size, 1)
   t.ok(queue.has(TEST_CHALLENGER))
@@ -111,7 +130,7 @@ tap.test('should add a challenger', function addTest(t) {
 })
 
 tap.test('should start match', function deleteTest(t) {
-  chatEmit('start')
+  socketEmit('start')
 
   t.equal(queue.size, 0)
   t.equal(channel.matches.length, 1)
@@ -129,7 +148,7 @@ tap.test('should start match', function deleteTest(t) {
 })
 
 tap.test('should register a win', function winTest(t) {
-  chatEmit('win')
+  socketEmit('win')
 
   t.equal(match.wins, 1)
   t.equal(match.losses, 0)
@@ -139,7 +158,7 @@ tap.test('should register a win', function winTest(t) {
 })
 
 tap.test('should register a loss', function lossTest(t) {
-  chatEmit('loss')
+  socketEmit('loss')
 
   t.equal(match.wins, 1)
   t.equal(match.losses, 1)
@@ -149,7 +168,7 @@ tap.test('should register a loss', function lossTest(t) {
 })
 
 tap.test('should win the match', function matchWinTest(t) {
-  chatEmit('win')
+  socketEmit('win')
 
   t.equal(match.wins, 2)
   t.equal(match.losses, 1)
@@ -162,7 +181,7 @@ tap.test('should win the match', function matchWinTest(t) {
 })
 
 tap.test('should add a challenger', function addTest(t) {
-  chatEmit(`add ${TEST_CHALLENGER} ${TEST_CHALLENGER} TEST CHALLENGER`)
+  socketEmit(`add ${TEST_CHALLENGER} ${TEST_CHALLENGER} TEST CHALLENGER`)
 
   t.equal(queue.size, 1)
   t.ok(queue.has(TEST_CHALLENGER))
@@ -176,22 +195,9 @@ tap.test('should add a challenger', function addTest(t) {
   t.end()
 })
 
-tap.test('should not enter a challenger', function notEnterTest(t) {
-  chatEmit(
-    `enter ${TEST_CHALLENGER2} TEST2 CHALLENGER2`
-  , TEST_CHALLENGER2
-  )
-
-  t.equal(queue.size, 1)
-  t.notOk(queue.has(TEST_CHALLENGER2))
-
-  t.end()
-})
-
-tap.test('should enter a subbed challenger', function enterSubTest(t) {
-  chatEmit(
-    `enter ${TEST_CHALLENGER2} TEST2 CHALLENGER2`
-  , TEST_CHALLENGER2
+tap.test('should add a subbed challenger', function addSubTest(t) {
+  socketEmit(
+    `add ${TEST_CHALLENGER2} ${TEST_CHALLENGER2} TEST2 CHALLENGER2`
   , true
   )
 
@@ -210,7 +216,7 @@ tap.test('should enter a subbed challenger', function enterSubTest(t) {
 })
 
 tap.test('should toggle off subs only', function subsOnlyOffTest(t) {
-  chatEmit('open')
+  socketEmit('open')
 
   t.ok(channel.open)
   t.notOk(channel.subsOnly)
@@ -218,20 +224,10 @@ tap.test('should toggle off subs only', function subsOnlyOffTest(t) {
   t.end()
 })
 
-tap.test('should not enter a challenger', function notEnterIncompleteTest(t) {
-  chatEmit('enter', TEST_CHALLENGER3, true)
-  chatEmit('enter notenough', TEST_CHALLENGER3, true)
-
-  t.equal(queue.size, 2)
-  t.notOk(queue.has(TEST_CHALLENGER3))
-
-  t.end()
-})
-
 tap.test('should not add a challenger', function notAddIncompleteTest(t) {
-  chatEmit('add')
-  chatEmit('add notenough')
-  chatEmit('add notenough notenough')
+  socketEmit('add')
+  socketEmit('add notenough')
+  socketEmit('add notenough notenough')
 
   t.equal(queue.size, 2)
   t.notOk(queue.has(TEST_CHALLENGER3))
@@ -239,9 +235,9 @@ tap.test('should not add a challenger', function notAddIncompleteTest(t) {
   t.end()
 })
 
-tap.test('should enter a challenger', function enterTest(t) {
-  chatEmit(
-    `enter ${TEST_CHALLENGER3} TEST3 CHALLENGER3`
+tap.test('should add a challenger', function addTest(t) {
+  socketEmit(
+    `add ${TEST_CHALLENGER3} ${TEST_CHALLENGER3} TEST3 CHALLENGER3`
   , TEST_CHALLENGER3
   )
 
@@ -261,7 +257,7 @@ tap.test('should enter a challenger', function enterTest(t) {
 })
 
 tap.test('should set first to 5', function setFirstToFive(t) {
-  chatEmit('set firstViewer 5')
+  socketEmit('set firstViewer 5')
 
   t.equal(channel.firstTo, 5)
 
@@ -269,7 +265,7 @@ tap.test('should set first to 5', function setFirstToFive(t) {
 })
 
 tap.test('should set first to 1', function setFirstToOne(t) {
-  chatEmit('set first 1')
+  socketEmit('set first 1')
 
   t.equal(channel.firstTo, 1)
   t.equal(channel.firstToSub, 1)
@@ -278,7 +274,7 @@ tap.test('should set first to 1', function setFirstToOne(t) {
 })
 
 tap.test('should set subs first to 8', function setSubsFirstToEight(t) {
-  chatEmit('set firstSub 8')
+  socketEmit('set firstSub 8')
 
   t.equal(channel.firstTo, 1)
   t.equal(channel.firstToSub, 8)
@@ -287,7 +283,7 @@ tap.test('should set subs first to 8', function setSubsFirstToEight(t) {
 })
 
 tap.test('should start match', function deleteTest(t) {
-  chatEmit('start')
+  socketEmit('start')
 
   t.equal(queue.size, 2)
   t.equal(channel.matches.length, 2)
@@ -305,7 +301,7 @@ tap.test('should start match', function deleteTest(t) {
 })
 
 tap.test('should forfeit match', function forfeitTest(t) {
-  chatEmit('forfeit')
+  socketEmit('forfeit')
 
   t.ok(match.isForfeited)
   t.notOk(channel.currentMatch)
@@ -314,20 +310,8 @@ tap.test('should forfeit match', function forfeitTest(t) {
   t.end()
 })
 
-tap.test('should not start match', function notStartNotAdminTest(t) {
-  chatEmit('start', TEST_CHALLENGER)
-
-  t.equal(queue.size, 2)
-  t.equal(channel.matches.length, 2)
-
-  t.notOk(channel.currentMatch)
-  t.notOk(channel.currentChallenger)
-
-  t.end()
-})
-
 tap.test('should start match', function deleteTest(t) {
-  chatEmit('start')
+  socketEmit('start')
 
   t.equal(queue.size, 1)
   t.equal(channel.matches.length, 3)
@@ -345,7 +329,7 @@ tap.test('should start match', function deleteTest(t) {
 })
 
 tap.test('should not start match', function notStartTest(t) {
-  chatEmit('start')
+  socketEmit('start')
 
   t.equal(queue.size, 1)
   t.equal(channel.matches.length, 3)
@@ -364,7 +348,7 @@ tap.test('should not start match', function notStartTest(t) {
 
 tap.test('should lose the match', function matchLoseTest(t) {
   for (let i=1; i <= 8; i++) {
-    chatEmit('loss')
+    socketEmit('loss')
 
     t.equal(match.wins, 0)
     t.equal(match.losses, i)
@@ -385,76 +369,23 @@ tap.test('should lose the match', function matchLoseTest(t) {
 })
 
 tap.test('should clear list', function clearTest(t) {
-  chatEmit('clear')
+  socketEmit('clear')
 
   t.equal(channel.queue.size, 0)
 
   t.end()
 })
 
-tap.test('should set limit to 0', function limitTest(t) {
-  chatEmit('set limit 0')
-
-  t.equal(channel.limit, 0)
-
-  t.end()
-})
-
-tap.test('should not enter a challenger', function notEnterIncompleteTest(t) {
-  chatEmit('enter test test', TEST_CHALLENGER3, true)
-
-  t.equal(queue.size, 0)
-  t.notOk(queue.has(TEST_CHALLENGER3))
-
-  t.end()
-})
-
-tap.test('should not close list', function notCloseTest(t) {
-  chatEmit('close', TEST_CHALLENGER)
-
-  t.ok(channel.open)
-
-  t.end()
-})
-
 tap.test('should close list', function closeTest(t) {
-  chatEmit('close')
+  socketEmit('close')
 
   t.notOk(channel.open)
 
   t.end()
 })
 
-tap.test('should list challengers', function listTest(t) {
-  chatEmit('list', TEST_CHALLENGER)
-
-  t.ok(new Date().valueOf() - client.lastListTime < 250)
-
-  t.end()
-})
-
-tap.test('should not list challengers', function notListTest(t) {
-  function delayList() {
-    chatEmit('list', TEST_CHALLENGER)
-
-    t.notOk(new Date().valueOf() - client.lastListTIme < 250)
-
-    t.end()
-  }
-
-  setTimeout(delayList, 250)
-})
-
-tap.test('should not deactivate bot', function notDeactivateTest(t) {
-  chatEmit('off', TEST_CHALLENGER)
-
-  t.ok(channel.active)
-
-  t.end()
-})
-
 tap.test('should deactivate bot', function deactivateTest(t) {
-  chatEmit('off')
+  socketEmit('off')
 
   t.notOk(channel.active)
 

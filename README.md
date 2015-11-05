@@ -105,7 +105,7 @@ challengers with the `add` command.
 #### add *&lt;Twitch Username> &lt;NNID> &lt;In-Game Name>*
 
 Manually adds a challenger to the end of the list. This command can be used even
-if the list is closed.
+if the list is closed or full.
 
 ```irc
 <zssrocks> !sm4sh add rosaluma popOff22 Danny
@@ -187,6 +187,11 @@ currently in progress.
 
 Here's what you can set:
 
+#### limit *lt;number of challengers>*
+
+Sets the max size the challenger list can grow to. Admins are allowed to surpass
+this limit. *The default is 20 challengers.*
+
 ##### firstTo *&lt;number of games>*
 
 Sets the number of games a challenger or the streamer must win to take the set.
@@ -202,12 +207,12 @@ Sets the number of games a viewer or the streamer must win to take the set.
 
 *Aliases: firsttoviewer, firstviewer, firstviewer, fv*
 
-##### firstToSubs *&lt;number of games>*
+##### firstToSub *&lt;number of games>*
 
 Sets the number of games a sub or the streamer must win to take the set.
 *The default is 3 (best of 5).*
 
-*Aliases: firstToSubs, firstSubs, firstsubs, fs*
+*Aliases: firsttosub, firstSub, firstsub, fs*
 
 ### Challenger (Public)
 
