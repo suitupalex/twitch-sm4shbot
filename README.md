@@ -19,7 +19,7 @@ bug report, here is how you can reach us:
 ## Contributing
 
 Sm4shbot is an open source project! If you know how to code, feel free to make a
-PR or create an issue for an ideas/code bugs.
+PR or create an issue for any ideas/code bugs.
 
 ## Setup
 
@@ -44,6 +44,41 @@ The kewyord to trigger bot commands is `!sm4sh`. E.g.:
 ```
 
 *Aliases: !smash*
+
+### Challenger (Public)
+
+The following commands can be used by anyone in the chat.
+
+#### enter *&lt;NNID> &lt;In-Game Name>*
+
+Enters you into the challenger list.
+
+```irc
+<rosaluma> !sm4sh enter popOff22 Danny
+```
+
+*Aliases: join, register*
+
+#### leave
+
+Drops you from the challenger list.
+
+```irc
+<rosaluma> !sm4sh leave
+```
+
+*Aliases: lv, drop*
+
+#### list
+
+Shows the list of challengers. This command only works once every 30 seconds to
+prevent spamming.
+
+```irc
+<rosaluma> !sm4sh list
+```
+
+*Aliases: ls*
 
 ### Admin
 
@@ -187,7 +222,7 @@ currently in progress.
 
 Here's what you can set:
 
-#### limit *lt;number of challengers>*
+##### limit *&lt;number of challengers>*
 
 Sets the max size the challenger list can grow to. Admins are allowed to surpass
 this limit. *The default is 20 challengers.*
@@ -213,41 +248,6 @@ Sets the number of games a sub or the streamer must win to take the set.
 *The default is 3 (best of 5).*
 
 *Aliases: firsttosub, firstSub, firstsub, fs*
-
-### Challenger (Public)
-
-The following commands can be used by anyone in the chat.
-
-#### enter *&lt;NNID> &lt;In-Game Name>*
-
-Enters you into the challenger list.
-
-```irc
-<rosaluma> !sm4sh enter popOff22 Danny
-```
-
-*Aliases: join, register*
-
-#### leave
-
-Drops you from the challenger list.
-
-```irc
-<rosaluma> !sm4sh leave
-```
-
-*Aliases: lv, drop*
-
-#### list
-
-Shows the list of challengers. This command only works once every 30 seconds to
-prevent spamming.
-
-```irc
-<rosaluma> !sm4sh list
-```
-
-*Aliases: ls*
 
 ## License
 
