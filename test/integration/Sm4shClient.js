@@ -11,6 +11,7 @@ const TEST_CHANNEL = process.env.SB_USERNAME || 'twitch_sm4shbot'
 const TEST_CHALLENGER = process.env.SB_TEST_CHALLENGER || 'challenger'
 const TEST_CHALLENGER2 = process.env.SB_TEST_CHALLENGER2 || 'challenger2'
 const TEST_CHALLENGER3 = process.env.SB_TEST_CHALLENGER3 || 'challenger3'
+const CHAT_RATE_LIMIT = parseInt(process.env.SB_CHAT_RATE_LIMIT) || 19
 
 var client
 var channels
@@ -470,7 +471,7 @@ tap.test('Should clear the rate limit', function clearRateLimitTest(t) {
 })
 
 tap.test('Should hit the rate limit', function rateLimitTest(t) {
-  for (let i = 1; i < 99; i++) {
+  for (let i = 1; i < CHAT_RATE_LIMIT; i++) {
     t.ok(client.say('test', 'test'))
   }
 
