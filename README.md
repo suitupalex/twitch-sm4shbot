@@ -45,6 +45,14 @@ The kewyord to trigger bot commands is `!sm4sh`. E.g.:
 
 *Aliases: !smash*
 
+#### !enter
+
+The keyword `!enter` can be used as a shortcut for `!sm4sh enter`. E.g.:
+
+```irc
+<rosaluma> !enter popOff22 Danny
+```
+
 ### Challenger (Public)
 
 The following commands can be used by anyone in the chat.
@@ -55,6 +63,12 @@ Enters you into the challenger list.
 
 ```irc
 <rosaluma> !sm4sh enter popOff22 Danny
+```
+
+As stated above, the `!enter` shortcut can be used:
+
+```irc
+<rosaluma> !enter popOff22 Danny
 ```
 
 *Aliases: join, register*

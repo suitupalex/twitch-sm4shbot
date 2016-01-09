@@ -20,7 +20,7 @@ var queue
 var challenger
 var match
 
-function chatEmit(command, challenger, sub) {
+function chatEmit(command, challenger, sub, kw) {
   client.emit(
     'chat'
   , `#${TEST_CHANNEL}`
@@ -28,7 +28,7 @@ function chatEmit(command, challenger, sub) {
       'display-name': challenger ? challenger : TEST_USERNAME
     , subscriber: Boolean(sub)
     }
-  , `${KW} ${command}`
+  , `${kw ? kw : KW} ${command}`
   )
 }
 
@@ -191,9 +191,10 @@ tap.test('should not enter a challenger', function notEnterTest(t) {
 
 tap.test('should enter a subbed challenger', function enterSubTest(t) {
   chatEmit(
-    `enter ${TEST_CHALLENGER2} TEST2 CHALLENGER2`
+    `${TEST_CHALLENGER2} TEST2 CHALLENGER2`
   , TEST_CHALLENGER2
   , true
+  , '!enter'
   )
 
   t.equal(queue.size, 2)
